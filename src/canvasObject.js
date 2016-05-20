@@ -1,9 +1,9 @@
 'use strict';
 
 require('openseadragon');
-var ImageResource = require('./ImageResource');
-var ImageResourceFactory = require('./ImageResourceFactory');
-var ThumbnailFactory = require('./ThumbnailFactory');
+var ImageResource = require('./imageResource');
+var ImageResourceFactory = require('./imageResourceFactory');
+var ThumbnailFactory = require('./thumbnailFactory');
 
 var CanvasObject = function(config) {
   var self = this;

@@ -1,7 +1,7 @@
 'use strict';
 
 require('openseadragon');
-var ImageResource = require('./ImageResource');
+var ImageResource = require('./imageResource');
 
 var _getRectFromStringArray = function(arr) {
   var rectArray = arr.map(function(number) {

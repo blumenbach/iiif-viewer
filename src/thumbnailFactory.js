@@ -1,6 +1,6 @@
 'use strict';
 
-var ImageResource = require('./ImageResource');
+var ImageResource = require('./imageResource');
 var imageFormatError = "Unsupported image format for LegacyTileSource.";
 
 var _getResourceFormat = function(mimeType) {
