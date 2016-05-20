@@ -1,9 +1,9 @@
 {
-  "name": "iiifManifestLayout",
-  "version": "0.0.10",
+  "name": "iiif-viewer",
+  "version": "0.0.1",
   "description": "A project that does stuff.",
-  "homepage": "https://github.com/sul-dlss/iiifManifestLayouts",
-  "repository": "sul-dlss/iiifManifestLayouts",
+  "homepage": "https://github.com/blumenbach/iiif-viewer",
+  "repository": "blumenbach/iiif-viewer",
   "author": "aeschylus",
   "files": [
     "dist"
@@ -17,7 +17,11 @@
     "3"
   ],
   "dependencies": {
-    "openseadragon": "^2.1.0"
+    "openseadragon": "^2.1.0",
+    "node-rest-client": "latest",
+    "d3": "latest",
+    "keymaster": "latest",
+    "jquery-ui": "latest"
   },
   "devDependencies": {
     "brfs": "latest",

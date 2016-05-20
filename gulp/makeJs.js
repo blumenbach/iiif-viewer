@@ -19,7 +19,7 @@ var gulp = require('gulp'),
 
 
 gulp.task('browserifyWithDeps', function() {
-	var bundler = browserify({entries: ["./src/entry.js"],standalone: "iiifviewer", debug: true});
+	var bundler = browserify({entries: ["./src/entry.js"],standalone: "iiif-viewer", debug: true});
 	
 	return bundler
 		.transform({global:true}, shim)
@@ -60,7 +60,7 @@ gulp.task('makeBundledCopy', function() {
  * Faster, because we don't minify, and include source maps in js file (notice we store it with .min.js extension, so we don't have to change the index.html file for debugging)
  */
 gulp.task('browserifyForDebug', function() {
-	var bundler = browserify({entries: ["./src/entry.js"],standalone: "iiifviewer", debug: true});
+	var bundler = browserify({entries: ["./src/entry.js"],standalone: "iiif-viewer", debug: true});
 	
 	return bundler
 		.transform({global:true}, shim)

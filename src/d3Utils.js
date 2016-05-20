@@ -1,6 +1,6 @@
 'use strict';
 
-var d3 = require('./lib/d3-slim-dist');
+var d3 = require('d3');
 
 var d3Utils = function(config) {
   this.dispatcher = config.dispatcher;
@@ -180,7 +180,7 @@ d3Utils.prototype = {
         .each(function() { ++n; })
         .each("end", function() { if (!--n) callback.apply(this, arguments); });
     }
-  },
+  }
 };
 
 module.exports = d3Utils;
