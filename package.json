@@ -17,11 +17,16 @@
     "3"
   ],
   "dependencies": {
-    "openseadragon": "^2.1.0",
+    "openseadragon": "latest",
     "node-rest-client": "latest",
     "d3": "latest",
     "keymaster": "latest",
-    "jquery-ui": "latest"
+    "jquery-ui": "latest",
+    "jquery": "latest",
+    "socket.io":"latest",
+    "socket.io-client": "latest",
+    "http": "latest"
+
   },
   "devDependencies": {
     "brfs": "latest",

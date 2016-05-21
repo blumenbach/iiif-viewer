@@ -1,13 +1,16 @@
 "use strict";
 var $ =  require('jquery'),
     ui = require('jquery-ui'),
-    EventEmitter = require('events').EventEmitter,
     Manifestor = require('./manifestor'),
     key = require('keymaster'),
     Client = require('node-rest-client').Client;
+var io = require('socket.io-client');
+
+
+var options = function(options) {
+};
 
 var Viewer = function(parent, options) {
-    EventEmitter.call(this);
     var viewer = this;
     viewer.options = $.extend(true, {}, module.exports.defaults, options);
 
@@ -16,8 +19,7 @@ var Viewer = function(parent, options) {
         viewer.$images = $('#images-list');
         viewer.$images.empty();
 
-        [
-            {url: 'http://localhost:4010/example/test.json', label: 'localhost'},
+        [{url: 'http://localhost:4010/example/test.json', label: 'localhost'},
             {
                 url: 'http://demos.biblissima-condorcet.fr/iiif/metadata/BVMM/chateauroux/manifest.json',
                 label: 'BNF Detail Images Demo (Chateauroux)'
@@ -37,146 +39,154 @@ var Viewer = function(parent, options) {
                 .appendTo(viewer.$manifestPicker);
         });
 
-        var openSelectedManifest = function (selected) {
-            var client = new Client();
-            var manifestUrl = selected;
+            var manifestUrl = viewer.$manifestPicker.val();
             viewer.$images.empty();
 
-            var args = {
-                headers: {"Accept": "application/json"}
-            };
-            client.get(manifestUrl, args, function (manifest, response) {
-                console.log(manifest);
-                console.log(response);
-                viewer.manifestor = Manifestor({
-                    manifest: manifest,
-                    container: $('#example-container'),
-                    perspective: 'overview',
-                    canvasClass: 'canvas',
-                    frameClass: 'frame',
-                    labelClass: 'label',
-                    viewportPadding: {
-                        top: 0,
-                        left: 10,
-                        right: 10,
-                        bottom: 10
-                    }
-                });
-                viewer.manifestor.selectViewingMode(viewer.currentMode);
-                viewer.manifestor.on('detail-tile-source-requested', function (e) {
-                });
-                viewer.manifestor.on('viewer-state-updated', function () {
-                    console.log('I have updated!');
-                });
-
-                viewer.$images.sortable({
-                    stop: function (event, ui) {
-                        var inputs = event.target.querySelectorAll('input');
-                        var i = 0;
-                        for (i; i < inputs.length; i++) {
-
-                            // zIndex is backwards from this UI; 0 is on the bottom for zIndex, but 0 is the top
-                            // of this sortable UI element array.
-                            var image = viewer.selectedCanvas.getImageById(inputs[i].id);
-                            viewer.selectedCanvas.moveToIndex(image, inputs.length - (i + 1));
-                        }
-                    }
-                });
-
-                var _setCheckbox = function (id, value) {
-                    var checkbox = $('#' + id);
-                    checkbox.prop('checked', value);
+            var openSelectedManifest = function (manifestUrl, callback) {
+                var args = {
+                    headers: {"Accept": "application/json"}
                 };
-
-                viewer.manifestor.on('image-hide', function (e) {
-                    _setCheckbox(e.detail, false);
-                });
-
-                viewer.manifestor.on('image-show', function (e) {
-                    _setCheckbox(e.detail, true);
-                });
-
-                viewer.manifestor.on('image-resource-tile-source-opened', function (e) {
-                    _setCheckbox(e.detail.id, e.detail.visible);
-                });
-
-                var setImagesForCanvas = function (canvas) {
-                    viewer.selectedCanvas = canvas;
-                    viewer.$images.empty();
-
-                    viewer.selectedCanvas.images.forEach(function (image) {
-                        var text = image.label;
-                        if (image.imageType === 'main') {
-                            text += " (default)";
-                        }
-                        if (image.imageType === 'detail') {
-                            text += " (detail)";
-                        }
-                        if (image.imageType !== 'thumbnail') {
-                            var listItem = $('<li>');
-                            var label = $('<label>').text(text);
-
-                            var checkbox = $('<input type=checkbox>');
-                            checkbox.prop('id', image.id);
-                            checkbox.prop('checked', image.visible);
-
-                            checkbox.change(image, function (event) {
-                                if (event.target.checked) {
-                                    if (image.status === 'shown') {
-                                        image.show();
-                                    } else {
-                                        viewer.selectedCanvas.removeThumbnail();
-                                        image.openTileSource();
-                                    }
-                                } else {
-                                    image.hide();
-                                }
-                            });
-                            label.append(checkbox);
-                            listItem.append(label);
-                            listItem.prependTo(viewer.$images);
+                var client = new Client();
+                var responseData = {};
+                client.get(manifestUrl, args, function (manifest, response) {
+                    console.log(manifest);
+                    console.log(response);
+                    if (viewer.manifestor) {
+                        viewer.manifestor.destroy();
+                    }
+                    viewer.manifestor = Manifestor({
+                        manifest: manifest,
+                        container: $('#example-container'),
+                        perspective: 'overview',
+                        canvasClass: 'canvas',
+                        frameClass: 'frame',
+                        labelClass: 'label',
+                        viewportPadding: {
+                            top: 0,
+                            left: 10,
+                            right: 10,
+                            bottom: 10
                         }
                     });
-                };
+                    viewer.manifestor.selectViewingMode(viewer.currentMode);
+                    viewer.manifestor.on('detail-tile-source-requested', function (e) {
+                    });
+                    viewer.manifestor.on('viewer-state-updated', function () {
+                        console.log('I have updated!');
+                    });
 
-                var selectedCanvas = viewer.manifestor.getSelectedCanvas();
-                if (selectedCanvas && viewer.manifestor.getState().perspective == 'detail') {
-                    setImagesForCanvas(selectedCanvas);
-                }
+                    viewer.$images.sortable({
+                        stop: function (event, ui) {
+                            var inputs = event.target.querySelectorAll('input');
+                            var i = 0;
+                            for (i; i < inputs.length; i++) {
 
-                viewer.manifestor.on('canvas-selected', function (event) {
-                    setImagesForCanvas(event.detail);
-                });
-
-                key('shift+j', function () {
-                    if (viewer.manifestor) {
-                        viewer.manifestor.selectPerspective('detail');
-                        var selectedCanvas = viewer.manifestor.getSelectedCanvas();
-                        if (selectedCanvas) {
-                            setImagesForCanvas(selectedCanvas);
+                                // zIndex is backwards from this UI; 0 is on the bottom for zIndex, but 0 is the top
+                                // of this sortable UI element array.
+                                var image = viewer.selectedCanvas.getImageById(inputs[i].id);
+                                viewer.selectedCanvas.moveToIndex(image, inputs.length - (i + 1));
+                            }
                         }
-                    }
-                    console.log('shifting to detail perspective');
-                });
+                    });
 
-                key('shift+k', function () {
-                    if (viewer.manifestor) {
-                        viewer.manifestor.selectPerspective('overview');
+                    var _setCheckbox = function (id, value) {
+                        var checkbox = $('#' + id);
+                        checkbox.prop('checked', value);
+                    };
+
+                    viewer.manifestor.on('image-hide', function (e) {
+                        _setCheckbox(e.detail, false);
+                    });
+
+                    viewer.manifestor.on('image-show', function (e) {
+                        _setCheckbox(e.detail, true);
+                    });
+
+                    viewer.manifestor.on('image-resource-tile-source-opened', function (e) {
+                        _setCheckbox(e.detail.id, e.detail.visible);
+                    });
+
+                    var setImagesForCanvas = function (canvas) {
+                        viewer.selectedCanvas = canvas;
                         viewer.$images.empty();
+
+                        viewer.selectedCanvas.images.forEach(function (image) {
+                            var text = image.label;
+                            if (image.imageType === 'main') {
+                                text += " (default)";
+                            }
+                            if (image.imageType === 'detail') {
+                                text += " (detail)";
+                            }
+                            if (image.imageType !== 'thumbnail') {
+                                var listItem = $('<li>');
+                                var label = $('<label>').text(text);
+
+                                var checkbox = $('<input type=checkbox>');
+                                checkbox.prop('id', image.id);
+                                checkbox.prop('checked', image.visible);
+
+                                checkbox.change(image, function (event) {
+                                    if (event.target.checked) {
+                                        if (image.status === 'shown') {
+                                            image.show();
+                                        } else {
+                                            viewer.selectedCanvas.removeThumbnail();
+                                            image.openTileSource();
+                                        }
+                                    } else {
+                                        image.hide();
+                                    }
+                                });
+                                label.append(checkbox);
+                                listItem.append(label);
+                                listItem.prependTo(viewer.$images);
+                            }
+                        });
+                    };
+
+                    var selectedCanvas = viewer.manifestor.getSelectedCanvas();
+                    if (selectedCanvas && viewer.manifestor.getState().perspective == 'detail') {
+                        setImagesForCanvas(selectedCanvas);
                     }
-                    console.log('shifting to overview perspective');
+
+                    viewer.manifestor.on('canvas-selected', function (event) {
+                        setImagesForCanvas(event.detail);
+                    });
+
+                    key('shift+j', function () {
+                        if (viewer.manifestor) {
+                            viewer.manifestor.selectPerspective('detail');
+                            var selectedCanvas = viewer.manifestor.getSelectedCanvas();
+                            if (selectedCanvas) {
+                                setImagesForCanvas(selectedCanvas);
+                            }
+                        }
+                        console.log('shifting to detail perspective');
+                    });
+
+                    key('shift+k', function () {
+                        if (viewer.manifestor) {
+                            viewer.manifestor.selectPerspective('overview');
+                            viewer.$images.empty();
+                        }
+                        console.log('shifting to overview perspective');
+                    });
+                    responseData = manifest;
+                    callback(responseData);
                 });
-            });
-        };
-        
-        openSelectedManifest(viewer.$manifestPicker.val());
-        if (viewer.manifestor) {
-            viewer.manifestor.destroy();
-        }
+            };
+
+        openSelectedManifest(manifestUrl, function (response) {
+            var socket = io.connect('localhost:3000', {});
+                var res =response.sequences[0].canvases[0].otherContent.resources[0].resource['@id'];
+                socket.emit('message', {"data:meta": res });
+        });
 
         $('#manifestPicker').on('change', function () {
             openSelectedManifest();
         });
+
         $('#mode').on('change', function (e) {
             viewer.currentMode = e.target[e.target.selectedIndex].value;
             if (viewer.manifestor) {
@@ -236,17 +246,14 @@ var Viewer = function(parent, options) {
         };
     };
     viewer.init();
-    viewer.emit('ready');
     return viewer;
 };
 
-    Viewer.prototype = new EventEmitter;
+$(function(){
+    new Viewer(parent, options);
+});
 
-    $( document ).ready( function () {
-        new Viewer(parent);
-    });
-
-    module.exports.$ = $;
-    module.exports.defaults = require('./defaults.js');
+module.exports.$ = $;
+module.exports.defaults = require('./defaults.js');
 
 

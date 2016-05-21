@@ -25,7 +25,8 @@
                 "height": 3125,
                 "width": 2048,
                 "service": {
-                  "@id": "http://localhost:8888/iiif/base_000"
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8888/iiif/807_001"
                 }
               },
               "on": "http://e.blumenbach.org/fcrepo/rest/edition/base/canvas/c000"
@@ -65,7 +66,8 @@
                 "height": 3125,
                 "width": 2048,
                 "service": {
-                  "@id": "http://localhost:8888/iiif/base_001"
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8888/iiif/807_002"
                 }
               },
               "on": "http://e.blumenbach.org/fcrepo/rest/edition/base/canvas/c001"
@@ -105,7 +107,8 @@
                 "height": 3125,
                 "width": 2048,
                 "service": {
-                  "@id": "http://localhost:8888/iiif/base_002"
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8888/iiif/807_003"
                 }
               },
               "on": "http://e.blumenbach.org/fcrepo/rest/edition/base/canvas/c002"
@@ -145,7 +148,8 @@
                 "height": 3125,
                 "width": 2048,
                 "service": {
-                  "@id": "http://localhost:8888/iiif/base_003"
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8888/iiif/807_004"
                 }
               },
               "on": "http://e.blumenbach.org/fcrepo/rest/edition/base/canvas/c003"
@@ -185,7 +189,8 @@
                 "height": 3125,
                 "width": 2048,
                 "service": {
-                  "@id": "http://localhost:8888/iiif/base_004"
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8888/iiif/807_005"
                 }
               },
               "on": "http://e.blumenbach.org/fcrepo/rest/edition/base/canvas/c004"
