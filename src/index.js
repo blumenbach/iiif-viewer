@@ -178,7 +178,7 @@ var Viewer = function(parent, options) {
             };
 
         openSelectedManifest(manifestUrl, function (response) {
-            var socket = io.connect('localhost:3000', {});
+            var socket = io.connect('localhost:3001', {});
                 var res = response.sequences[0].canvases[0].otherContent.resources[0].resource['@id'];
                 var message = JSON.parse(JSON.stringify({
                     data: res
