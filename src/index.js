@@ -179,8 +179,11 @@ var Viewer = function(parent, options) {
 
         openSelectedManifest(manifestUrl, function (response) {
             var socket = io.connect('localhost:3000', {});
-                var res =response.sequences[0].canvases[0].otherContent.resources[0].resource['@id'];
-                socket.emit('message', {"data:meta": res });
+                var res = response.sequences[0].canvases[0].otherContent.resources[0].resource['@id'];
+                var message = JSON.parse(JSON.stringify({
+                    data: res
+                }));
+                socket.emit('message', message);
         });
 
         $('#manifestPicker').on('change', function () {

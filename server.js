@@ -10,6 +10,7 @@ io.adapter(redis({ host: '127.0.0.1', port: 6379, key: 'meta' }));
 
 io.sockets.on('connection', function(socket) {
     socket.on('message', function(data) {
+        console.log(data);
         socket.broadcast.emit('message', data);
     });
 });
